@@ -18,7 +18,7 @@ void getPhotoData();
 
 Servo servo_one;
 Servo servo_two;
-AccelStepper stepper(AccelStepper::HALF4WIRE, step1, step2, step3, step4);
+AccelStepper stepper(8, step1, step3, step2, step4);
 int photo[4];
 int photo_offset[4];
 int top_avg,bot_avg,lef_avg,rig_avg,servo_pos = 90;
@@ -39,10 +39,10 @@ void setup() {
 
 void loop() {
   getPhotoData();
-  if(servo_pos == 135) {
+  if(servo_pos == 180) {
 servo_pos -= 1;
   }
-  else if(servo_pos == 45) {
+  else if(servo_pos == 0) {
     servo_pos += 1;
   }
   else if(bot_avg > top_avg) {
@@ -52,20 +52,21 @@ servo_pos -= 1;
     servo_pos += 1;
   }
   moveServos(servo_pos);
-  stepper.setSpeed(calcErrorH());
+  stepper.setSpeed(stepper.maxSpeed()*calcErrorH()/500);
   stepper.runSpeed();
-  Serial.println(calcErrorH());
-
+  Serial.print(lef_avg);
+  Serial.print(' ');
+  Serial.println(rig_avg);
   delay(40);
 
 }
 
 void moveStepper(AccelStepper stepper) {
-  stepper.setSpeed(stepper.maxSpeed()*calcErrorH()/500);
+  stepper.setSpeed(stepper.maxSpeed()*calcErrorH()/250);
 }
 
 int calcErrorH() {
-  return (lef_avg - rig_avg)*(1);
+  return (rig_avg - lef_avg)*(-1);
 
 }
 int calcErrorV() {return (abs(top_avg - bot_avg));}
